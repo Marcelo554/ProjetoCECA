@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Manutenção de Usuário</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <div class="container mt-5">
+        <h1>Manutenção de Usuário</h1>
+
+        <form method="POST" action="{{ url_for('usuario.consultar_codigo') }}">
+            {{ form.hidden_tag() }}
+
+            <!-- Campo de código -->
+            <div class="form-group">
+                {{ form.codigo.label(class="form-label") }}
+                <div class="input-group">
+                    {{ form.codigo(class="form-control", size=32) }}
+                    <div class="input-group-append">
+                        <button type="submit" name="action" value="pesquisar" class="btn btn-info">Pesquisar</button>
+                    </div>
+                </div>
+                {% if form.codigo.errors %}
+                    <div class="text-danger">
+                        {% for error in form.codigo.errors %}
+                            <p>{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Campos de nome e senha (inicialmente ocultos) -->
+            <div id="dadosUsuario" style="display:none;">
+                <!-- Campo de nome -->
+                <div class="form-group">
+                    {{ form.nome.label(class="form-label") }}
+                    {{ form.nome(class="form-control") }}
+                </div>
+
+                <!-- Campo de senha -->
+                <div class="form-group">
+                    {{ form.senha.label(class="form-label") }}
+                    {{ form.senha(class="form-control") }}
+                </div>
+
+                <!-- Botões de ação -->
+                <div class="form-group mt-3">
+                    <button type="submit" name="action" value="voltar" class="btn btn-secondary">Voltar</button>
+                    <button type="submit" name="action" value="limpar" class="btn btn-warning">Limpar</button>
+                    <button type="submit" name="action" value="excluir" class="btn btn-danger">Excluir</button>
+                    <button type="submit" name="action" value="salvar" class="btn btn-success">Salvar</button>
+                </div>
+            </div>
+        </form>
+
+        <!-- Exibição de dados do usuário após a pesquisa -->
+        {% if usuario %}
+            <div class="mt-4">
+                <h2>Dados do Usuário</h2>
+                <p><strong>Código:</strong> {{ usuario.codigo }}</p>
+                <p><strong>Nome:</strong> {{ usuario.nome }}</p>
+                <p><strong>Senha:</strong> (oculta)</p>
+
+                <!-- Mostrar campos de edição após a pesquisa -->
+                <script>
+                    document.getElementById('dadosUsuario').style.display = 'block';
+                </script>
+            </div>
+        {% endif %}
+    </div>
+</body>
+</html>

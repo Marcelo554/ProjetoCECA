@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cadastrar Usuário</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/styles.css') }}"
+  >
+</head>
+
+<body>static\css\styles.css
+    <div class="container">
+        <h1>Cadastrar Usuário</h1>
+
+        <!-- Formulário para entrada de dados -->
+        <form method="POST" action="{{ url_for('usuario.inserir') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">  <!-- Adicione esta linha -->
+
+            <div class="form-data">
+                <p>Dados do Usuário:</p>
+
+                <label for="codigo">Código</label>
+                <input type="text" id="codigo" name="codigo" maxlength="10" required pattern="\d{1,10}" inputmode="numeric" title="Insira um número de 1 a 9999999999"
+                oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                <br>
+                <br>
+                <label for="nome">Nome</label>
+                <input type="text" id="nome" name="nome" required maxlength="100"  style="text-transform: uppercase;" title="Insira o Nome">
+
+                <div class="button-container">
+                    <br>
+                    <button type="submit" class="btn salvar">Salvar</button>
+                    <button class="btn voltar" onclick="voltar()">Voltar</button>
+                    <!--    <button class="btn atualizar">Atualizar</button>-->
+                </div>
+
+
+                <script>
+                function voltar() {
+                    window.location.href = "{{ url_for('menu.menu_opcoes_cadastro_usuario') }}";
+                    }
+                </script>
+
+            </div>
+        </form>
+
+<!--        &lt;!&ndash; Formulário para voltar &ndash;&gt;-->
+<!--        <form action="{{ url_for('index') }}" method="GET">-->
+<!--            <div class="button-container">-->
+<!--                <button type="submit">Voltar</button>-->
+<!--            </div>-->
+<!--        </form>-->
+    </div>
+</body>
+</html>

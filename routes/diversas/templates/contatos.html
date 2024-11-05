@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="PT">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Contatos</title>
+    <link
+      rel="stylesheet"
+
+      <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      <link>
+
+    />
+  </head>
+
+  <body>
+    <!--    <h1 style="color:blue;">Nossos contatos são:</h1>-->
+    <h1>Nossos contatos são:</h1>
+
+    <h2>
+      <p>E-mail:nierosistemas@gmail.com</p>
+      <p>Celular: (16) 99181-2183</p>
+    </h2>
+
+    <div class="button-container">
+      <br />
+      <!--        <button class="btn salvar">Salvar</button>-->
+      <button class="btn voltar" onclick="voltar()">Voltar</button>
+      <!--    <button class="btn atualizar">Atualizar</button>-->
+    </div>
+
+    <script>
+      function voltar() {
+        window.location.href = "/"; // Redireciona para a página inicial
+      }
+    </script>
+  </body>
+</html>

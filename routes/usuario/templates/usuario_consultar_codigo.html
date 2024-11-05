@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Consultar Usuário</title>
+
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/styles.css') }}"
+  >
+</head>
+<body>
+
+
+    <div class="container">
+        <h1>Consultar usuário (Código)</h1>
+
+         <form method="POST" action="{{ url_for('usuario.manutencao_cadastro') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+            <label for="consulta_codigo">Código do usuário:</label>
+            <input type="text" id="consulta_codigo" name="consulta_codigo" placeholder="Digite o código">
+
+            <button type="submit"  class="btn salvar">Consultar</button>
+            <button type="button" class="btn voltar" onclick="window.location.href = "{{ url_for('menu.menu_opcoes_cadastro_usuario') }}'">Voltar Menu</button>
+        </form>
+
+
+        {% if usuario %}
+            <div class="form-data">
+                <h2>Dados do Usuário:</h2>
+                <form>
+                    <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">  <!-- Adicione este campo -->
+
+                    <label for="codigo">Código</label>
+                    <input type="text" id="codigo" value="{{ usuario.codigo }}" disabled>
+
+                    <label for="nome">Nome</label>
+                    <input type="text" id="nome" name="nome" value="{{ usuario.nome }}">
+                    <div class="button-container">
+                        <button class="btn voltar">Voltar</button>
+                        <input type="hidden" id="csrf_token" value="{{ csrf_token() }}">
+                    </div>
+
+
+                </form>
+
+            </div>
+        {% endif %}
+
+        <script>
+            function voltar() {
+                window.location.href = "{{ url_for('menu.menu_opcoes_cadastro_usuario') }}";
+                }
+        </script>
+
+
+        <script>
+        function excluirUsuario(url) {
+            if (confirm("Tem certeza que deseja excluir este usuário?")) {
+                const csrfToken = document.getElementById('csrf_token').value;
+
+                fetch(url, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': csrfToken
+                    }
+                })
+                .then(response => {
+                    console.log('Status da resposta:', response.status);
+                    if (response.ok) {
+                        alert('Usuário excluído com sucesso!');
+                        window.location.href = "{{ url_for('usuario.lista2') }}";  // Redireciona após exclusão
+                    } else {
+                        return response.json().then(data => {
+                            alert('Erro ao excluir usuário: ' + (data.error || 'Erro desconhecido'));
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    alert('Erro ao excluir usuário.');
+                });
+            }
+        }
+        </script>
+
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div class="messages">
+                    <ul>
+                        {% for message in messages %}
+                            <li>{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% endif %}
+        {% endwith %}
+
+
+   </div>
+
+
+

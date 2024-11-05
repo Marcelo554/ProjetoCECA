@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+    <link>
+
+</head>
+<body>
+    <h1>Menu Principal</h1>
+    <ul>
+        <li><a href="{{ url_for('menu.menu_modulo_cadastros_gerais') }}">1- Módulo Cadastros Gerias </a></li>
+        <li><a href="{{ url_for('diversas.contatos') }}">9- Contatos </a></li>
+    </ul>
+
+    <br />
+
+    <div class="button-container">
+        <br />
+        <!--    <button class="btn salvar">Salvar</button>-->
+        <button class="btn voltar" onclick="Sair()">Sair Sistema</button>
+        <!--    <button class="btn atualizar">Atualizar</button>-->
+    </div>
+
+    <script>
+        function Sair() {
+          window.location.href = "https://www.google.com"; // Redireciona para o Google
+        }
+    </script>
+
+</body>
+</html>

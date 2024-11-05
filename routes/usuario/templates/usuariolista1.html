@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link
+    rel="stylesheet"
+    href="{{ url_for('static', filename='css/styles.css') }}"
+  >
+</head>
+<body>
+    <h1>Lista de Usuários</h1>
+    <hr>
+    <table border=4>
+        <tr>
+            <td>ID</td>
+            <td>Código</td>
+            <td>Nome</td>
+            <td>Excluir</td>
+            <td>Atualizar</td>
+        </tr>
+
+        {% for Usuario in usuarios %}
+            <tr>
+                <td>{{ Usuario.idUsuario }}</td>
+                <td>{{ Usuario.codigo }}</td>
+                <td>{{ Usuario.nome }}</td>
+                <td><a href="/excluir/{{ Usuario.idUsuario }}">Excluir</a></td> <!-- Certifique-se que _id corresponde ao idUsuario -->
+                <td><a href="/atualizar/{{ Usuario.idUsuario }}">Atualizar</a></td>
+            </tr>
+        {% endfor %}
+    </table>
+
+    <br>
+
+    <div class="button-container">
+        <br>
+            <!--    <button class="btn salvar">Salvar</button>-->
+            <button class="btn voltar" onclick="voltar()">Voltar</button>
+            <!--    <button class="btn atualizar">Atualizar</button>-->
+    </div>
+
+    <script>
+    function voltar() {
+        window.location.href = "/"; // Redireciona para a página inicial
+        }
+    </script>
+
+
+</html>
