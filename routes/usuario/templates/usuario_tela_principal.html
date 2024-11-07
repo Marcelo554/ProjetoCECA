@@ -4,48 +4,42 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
     <meta charset='utf-8'>
     <title>Cadastro de Usuários</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">  <!-- Adiciona o token CSRF como meta tag -->
+    <meta name="viewport" content="width=device-width, initial-scale=1"> <!-- Define viewport para responsividade -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
   <div class="container-sm">
     <div class="row">
-      <h1>Cadastrar Usuários</h1>
-      <div class="col-4">
-        <form action="{{ url_for('usuario.rota_inclusao_manutencao_cadastro_usuario') }}" method="POST">
+      <h1 class="text-center my-4">Cadastrar Usuários</h1>
+      <div class="col-12 col-md-6 col-lg-4 mx-auto">
+        <form id="form-usuario" action="{{ url_for('usuario.rota_inclusao_manutencao_cadastro_usuario') }}" method="POST">
             {{ form.hidden_tag() }}
             <div class="mb-3">
               <label for="codigo" class="form-label">Código</label>
-              <input type="text" class="form-control" id="codigo"
-              name="codigo"
-              value='{{ form.codigo.data }}'
-              pattern="\d{5}" maxlength="5" minlength="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">>
+              <input type="text" class="form-control" id="codigo" name="codigo" value='{{ form.codigo.data }}' pattern="\d{5}" maxlength="5" minlength="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
             </div>
 
             <div class="mb-3">
               <label for="nome" class="form-label">Nome</label>
-              <input type="text" class="form-control" id="nome"
-              name="nome"
-              value='{{ form.nome.data }}'
-              maxlength="100"
-              oninput="this.value = this.value.toUpperCase();">
+              <input type="text" class="form-control" id="nome" name="nome" value='{{ form.nome.data }}' maxlength="100" oninput="this.value = this.value.toUpperCase();">
             </div>
 
             <div class="mb-3">
               <label for="senha" class="form-label">Senha</label>
-              <input type="password" class="form-control" id="senha"
-              name="senha" value='{{ form.senha.data }}'
-              maxlength="10">
+              <input type="password" class="form-control" id="senha" name="senha" value='{{ form.senha.data }}' maxlength="10">
             </div>
 
-            <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
+            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
         </form>
       </div>
     </div>
   </div>
 
   <div class="container-sm mt-5">
-    <h3 class="mt-5">Pessoas Cadastradas</h3>
-    <table class="table table-hover">
+    <h3 class="text-center mt-5">Pessoas Cadastradas</h3>
+    <table class="table table-hover table-responsive">
       <thead class="table-dark">
         <tr align="center">
           <th>idUsuario</th>
@@ -57,18 +51,15 @@
       </thead>
       <tbody>
         {% for usuario in result %}
-        <tr align="center">
+        <tr align="center" class="usuario-row" data-id="{{ usuario.idUsuario }}">
           <td>{{ usuario.idUsuario }}</td>
           <td>{{ usuario.codigo }}</td>
-          <td>{{ usuario.nome }}</td>
+          <td class="text-start">{{ usuario.nome }}</td>  <!-- Alinhando o Nome à esquerda -->
           <td>{{ usuario.senha|mask }}</td>
           <td>
-            <a class="btn btn-danger btn-sm" href='/deletar/{{ usuario.codigo }}'>
+            <button class="btn btn-danger btn-sm deletar-btn" data-id="{{ usuario.idUsuario }}">
               <i class="bi bi-trash"></i> Deletar
-            </a>
-            <a href='/atualizar/{{ usuario.codigo }}' class="btn btn-secondary btn-sm">
-              <i class="bi bi-arrow-clockwise"></i> Atualizar
-            </a>
+            </button>
           </td>
         </tr>
         {% endfor %}
@@ -100,5 +91,76 @@
       </ul>
     </nav>
   </div>
+
+  <script>
+    $(document).ready(function() {
+      console.log("Document ready. JavaScript carregado corretamente.");
+
+      // Função para obter o token CSRF
+      function getCsrfToken() {
+        return $('meta[name="csrf-token"]').attr('content');
+      }
+
+      // Evento de clique na linha da tabela
+      $('.usuario-row').click(function(event) {
+        console.log("Linha da tabela clicada.");  // Verifica se o clique na linha foi registrado
+        // Impede que o clique no botão "Deletar" acione o clique na linha
+        if (!$(event.target).hasClass('btn-danger')) {
+          var idUsuario = $(this).data('id');
+          console.log("Buscando usuário com idUsuario:", idUsuario);
+          $.ajax({
+            url: '/usuario/buscar_usuario',
+            method: 'GET',
+            data: { idUsuario: idUsuario },
+            success: function(data) {
+              console.log("Resposta da busca do usuário:", data);
+              if (data.error) {
+                alert(data.error);
+              } else {
+                $('#codigo').val(data.codigo);
+                $('#nome').val(data.nome);
+                $('#senha').val(data.senha);
+              }
+            },
+            error: function(xhr, status, error) {
+              console.log("Erro ao buscar dados do usuário:", error);
+              alert('Erro ao buscar dados do usuário.');
+            }
+          });
+        }
+      });
+
+      // Evento de clique no botão "Deletar"
+      $('.btn-danger').click(function(event) {
+        event.stopPropagation();  // Impede que o clique no botão "Deletar" acione o clique na linha
+        var idUsuario = $(this).closest('.usuario-row').data('id');
+        console.log("Deletando usuário com idUsuario:", idUsuario);
+        console.log("Enviando dados: ", JSON.stringify({ idUsuario: idUsuario }));
+        $.ajax({
+          url: '/usuario/deletar',
+          method: 'POST',
+          contentType: 'application/json',  // Especifica que estamos enviando JSON
+          dataType: 'json',  // Especifica que esperamos JSON de volta
+          headers: { "X-CSRFToken": getCsrfToken() },  // Inclui o token CSRF nos headers
+          data: JSON.stringify({ idUsuario: idUsuario }),  // Enviar os dados como string JSON
+          success: function(response) {
+            console.log("Resposta da exclusão do usuário:", response);
+            if (response.error) {
+              alert(response.error);
+            } else {
+              alert('Usuário deletado com sucesso.');
+              location.reload();  // Recarrega a página para atualizar a lista de usuários
+            }
+          },
+          error: function(xhr, status, error) {
+            console.log("Erro ao deletar usuário:", error);
+            console.log("Status: ", status);
+            console.log("Erro: ", xhr.responseText);
+            alert('Erro ao deletar o usuário.');
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html>

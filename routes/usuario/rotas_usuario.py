@@ -6,7 +6,7 @@
 from .forms import Class_Form_Cadastro_Usuario
 from flask import flash, request, render_template
 import logging
-from flask import Blueprint,  redirect, url_for
+from flask import Blueprint,  redirect, url_for, jsonify
 from sqlalchemy.exc import SQLAlchemyError
 
 from models.models import Usuario, db
@@ -269,3 +269,56 @@ def rota_inclusao_manutencao_cadastro_usuario():
         total_pages=total_pages,
         pessoa=[{'codigo': '', 'Nome': '', 'senha': ''}]  # Inicializando o formulário de novo cadastro vazio
     )
+
+
+@usuario_blueprint.route('/buscar_usuario', methods=['GET'])
+def buscar_usuario():
+    """Busca idUsuario no banco"""
+    print('Oiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa !!!!!!!!!')
+    print('Entrei na rotina buscar_usuario ......')
+    id_usuario = request.args.get('idUsuario')
+    print(f"Recebido idUsuario: {id_usuario}")
+
+    try:
+        id_usuario = int(id_usuario)
+    except ValueError:
+        return jsonify({"error": "idUsuario inválido"}), 400
+
+    usuario = Usuario.query.filter_by(idUsuario=id_usuario).first()
+    if usuario:
+        print(f"Usuário encontrado: {usuario.nome}")
+        return jsonify({
+            'codigo': usuario.codigo,
+            'nome': usuario.nome,
+            'senha': usuario.senha
+        })
+    else:
+        print("Usuário não encontrado.")
+        return jsonify({"error": "Usuário não encontrado"}), 404
+
+@usuario_blueprint.route('/deletar', methods=['POST'])
+def deletar_usuario():
+    """Deleta um usuário do banco"""
+    data = request.get_json()
+    if not data or 'idUsuario' not in data:
+        print("Dados inválidos recebidos.")
+        return jsonify({"error": "Dados inválidos"}), 400
+
+    id_usuario = data['idUsuario']
+    print(f"Tentando deletar idUsuario: {id_usuario}")
+
+    try:
+        id_usuario = int(id_usuario)
+    except ValueError:
+        print("idUsuario inválido.")
+        return jsonify({"error": "idUsuario inválido"}), 400
+
+    usuario = Usuario.query.filter_by(idUsuario=id_usuario).first()
+    if usuario:
+        db.session.delete(usuario)
+        db.session.commit()
+        print(f"Usuário {id_usuario} deletado.")
+        return jsonify({"success": True}), 200
+    else:
+        print("Usuário não encontrado.")
+        return jsonify({"error": "Usuário não encontrado"}), 404
