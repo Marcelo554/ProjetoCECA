@@ -1,7 +1,7 @@
 """
-Modulo principal do sistema
+Modulo principal do sistema biblioteca
 """
-import logging  # Import padrão
+import logging  # Import padrão'
 
 # Import de terceiros
 from flask import Flask,  redirect, url_for, Blueprint
@@ -39,7 +39,6 @@ app.secret_key = 'sua_chave_secreta_aqui'  # Troque por algo mais seguro
 
 
 # Inicialize CSRF e o banco de dados
-
 csrf = CSRFProtect(app)
 db.init_app(app)  # Inicializa o banco de dados com a configuração do Flask
 
