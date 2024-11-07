@@ -17,20 +17,27 @@
               <label for="codigo" class="form-label">Código</label>
               <input type="text" class="form-control" id="codigo"
               name="codigo"
-              value='{{ form.codigo.data }}'>
+              value='{{ form.codigo.data }}'
+              pattern="\d{5}" maxlength="5" minlength="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">>
             </div>
+
             <div class="mb-3">
               <label for="nome" class="form-label">Nome</label>
               <input type="text" class="form-control" id="nome"
               name="nome"
-              value='{{ form.nome.data }}'>
+              value='{{ form.nome.data }}'
+              maxlength="100"
+              oninput="this.value = this.value.toUpperCase();">
             </div>
+
             <div class="mb-3">
               <label for="senha" class="form-label">Senha</label>
               <input type="password" class="form-control" id="senha"
-              name="senha" value='{{ form.senha.data }}'>
+              name="senha" value='{{ form.senha.data }}'
+              maxlength="10">
             </div>
-            <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise"> </i>Atualizar</button>
+
+            <button type="submit" class="btn btn-primary"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
         </form>
       </div>
     </div>
@@ -41,6 +48,7 @@
     <table class="table table-hover">
       <thead class="table-dark">
         <tr align="center">
+          <th>idUsuario</th>
           <th>Código</th>
           <th>Nome</th>
           <th>Senha</th>
@@ -50,9 +58,10 @@
       <tbody>
         {% for usuario in result %}
         <tr align="center">
+          <td>{{ usuario.idUsuario }}</td>
           <td>{{ usuario.codigo }}</td>
           <td>{{ usuario.nome }}</td>
-          <td>{{ usuario.senha }}</td>
+          <td>{{ usuario.senha|mask }}</td>
           <td>
             <a class="btn btn-danger btn-sm" href='/deletar/{{ usuario.codigo }}'>
               <i class="bi bi-trash"></i> Deletar

@@ -50,6 +50,17 @@ def index():
     return redirect(url_for('menu.home'))
 
 
+# Definindo o filtro personalizado#
+@app.template_filter('mask')
+def mask_filter(s):
+    if s is None:
+        return '' # Retorna uma string vazia se o valor for None
+    return '*' * len(s)
+
+
+# Certifique-se de registrar o filtro
+app.jinja_env.filters['mask'] = mask_filter
+
 # Cria as tabelas no Banco de Dados se não existirem
 if __name__ == "__main__":
     with app.app_context():
