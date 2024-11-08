@@ -31,7 +31,12 @@
               <input type="password" class="form-control" id="senha" name="senha" value='{{ form.senha.data }}' maxlength="10">
             </div>
 
-            <button type="submit" class="btn btn-primary w-100"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
+            <div class="d-flex justify-content-between">
+                <button type="button" class="btn btn-secondary me-2" onclick="history.back();"><i class="bi bi-arrow-left-circle"> </i>Retornar</button>
+                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
+                <button type="button" class="btn btn-success" onclick="window.print();"><i class="bi bi-printer"> </i>Imprimir</button>
+            </div>
+
         </form>
       </div>
     </div>
@@ -162,5 +167,12 @@
       });
     });
   </script>
+
+  <script>
+    function Retornar() {
+        window.location.href = "{{ url_for('menu.home') }}";
+    }
+  </script>
+
 </body>
 </html>
