@@ -4,7 +4,7 @@
 
 # Ajuste o import conforme necessário
 from .forms import Class_Form_Cadastro_Usuario
-from flask import flash, request, render_template
+from flask import flash, request, render_template, send_file
 import logging
 from flask import Blueprint,  redirect, url_for, jsonify
 from sqlalchemy.exc import SQLAlchemyError
@@ -14,6 +14,32 @@ from models.models import Usuario, db
 from models.models import mostrar_todos_usuarios
 
 from routes.usuario.forms import Class_Form_Cadastro_Usuario
+
+from fpdf import FPDF
+from io import BytesIO
+
+
+class PDF(FPDF):
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Relatório de Usuários', 0, 1, 'C')
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
+
+    def chapter_title(self, title):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, title, 0, 1, 'L')
+        self.ln(10)
+
+    def chapter_body(self, body):
+        self.set_font('Arial', '', 12)
+        self.multi_cell(0, 10, body)
+        self.ln()
+
+
 
 
 # Define o Blueprint para o módulo de usuário
@@ -108,50 +134,50 @@ def consultar_codigo():
 
 
 
-@usuario_blueprint.route("/atualizar/<int:id>", methods=['GET', 'POST'])
-def atualizar(id):
-    """
-    Atualiza dados do usuário.
-    """
-    usuario = Usuario.query.get_or_404(id)
+# @usuario_blueprint.route("/atualizar/<int:id>", methods=['GET', 'POST'])
+# def atualizar(id):
+#     """
+#     Atualiza dados do usuário.
+#     """
+#     usuario = Usuario.query.get_or_404(id)
 
-    if request.method == 'POST':
-        usuario.codigo = request.form.get("codigo").strip()
-        usuario.nome = request.form.get("nome").strip().upper()
+#     if request.method == 'POST':
+#         usuario.codigo = request.form.get("codigo").strip()
+#         usuario.nome = request.form.get("nome").strip().upper()
 
-        try:
-            db.session.commit()
-            flash("Usuário atualizado com sucesso.", "success")
-            return redirect(url_for('usuario.consultar_codigo'))
-        except SQLAlchemyError as e:
-            db.session.rollback()
-            flash(f"Erro ao atualizar usuário: {str(e)}", "error")
+#         try:
+#             db.session.commit()
+#             flash("Usuário atualizado com sucesso.", "success")
+#             return redirect(url_for('usuario.consultar_codigo'))
+#         except SQLAlchemyError as e:
+#             db.session.rollback()
+#             flash(f"Erro ao atualizar usuário: {str(e)}", "error")
 
-    return render_template('usuario_manutencao_cadastro.html', usuario=usuario)
-
-
-@usuario_blueprint.route("/excluir/<int:id>", methods=['POST'])
-def excluir(id):
-    """
-    Exclui usuário do banco de dados.
-    """
-    usuario = Usuario.query.get_or_404(id)
-
-    try:
-        db.session.delete(usuario)
-        db.session.commit()
-        flash("Usuário excluído com sucesso.", "success")
-        return redirect(url_for('usuario.lista2'))
-    except SQLAlchemyError as e:
-        db.session.rollback()
-        flash(f"Erro ao excluir usuário: {str(e)}", "error")
-        return redirect(url_for('usuario.lista2'))
+#     return render_template('usuario_manutencao_cadastro.html', usuario=usuario)
 
 
-def buscar_usuario_por_codigo(codigo):
-    # Tenta buscar o usuário no banco de dados pelo código fornecido
-    usuario = Usuario.query.filter_by(codigo=codigo).first()
-    return usuario
+# @usuario_blueprint.route("/excluir/<int:id>", methods=['POST'])
+# def excluir(id):
+#     """
+#     Exclui usuário do banco de dados.
+#     """
+#     usuario = Usuario.query.get_or_404(id)
+
+#     try:
+#         db.session.delete(usuario)
+#         db.session.commit()
+#         flash("Usuário excluído com sucesso.", "success")
+#         return redirect(url_for('usuario.lista2'))
+#     except SQLAlchemyError as e:
+#         db.session.rollback()
+#         flash(f"Erro ao excluir usuário: {str(e)}", "error")
+#         return redirect(url_for('usuario.lista2'))
+
+
+# def buscar_usuario_por_codigo(codigo):
+#     # Tenta buscar o usuário no banco de dados pelo código fornecido
+#     usuario = Usuario.query.filter_by(codigo=codigo).first()
+#     return usuario
 
 
 
@@ -296,6 +322,7 @@ def buscar_usuario():
         print("Usuário não encontrado.")
         return jsonify({"error": "Usuário não encontrado"}), 404
 
+
 @usuario_blueprint.route('/deletar', methods=['POST'])
 def deletar_usuario():
     """Deleta um usuário do banco"""
@@ -322,3 +349,30 @@ def deletar_usuario():
     else:
         print("Usuário não encontrado.")
         return jsonify({"error": "Usuário não encontrado"}), 404
+
+
+
+@usuario_blueprint.route('/imprimir_cadastro', methods=['GET'])
+def imprimir_cadastro():
+    usuarios = Usuario.query.all()
+
+    pdf = PDF()
+    pdf.add_page()
+
+    # Adicionar título
+    pdf.chapter_title('Lista de Usuários')
+
+    # Adicionar dados dos usuários
+    for usuario in usuarios:
+        body = f"ID: {usuario.idUsuario}\nCódigo: {usuario.codigo}\nNome: {usuario.nome}\n"
+        pdf.chapter_body(body)
+
+   # Gera o PDF e obtém o conteúdo como string
+    pdf_content = pdf.output(dest='S').encode('latin1')
+
+    # Cria um objeto BytesIO e escreve o conteúdo do PDF nele
+    buffer = BytesIO()
+    buffer.write(pdf_content)
+    buffer.seek(0)
+
+    return send_file(buffer, as_attachment=True, download_name='relatorio_usuarios.pdf', mimetype='application/pdf')

@@ -32,9 +32,9 @@
             </div>
 
             <div class="d-flex justify-content-between">
-                <button type="button" class="btn btn-secondary me-2" onclick="history.back();"><i class="bi bi-arrow-left-circle"> </i>Retornar</button>
-                <button type="submit" class="btn btn-primary me-2"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
-                <button type="button" class="btn btn-success" onclick="window.print();"><i class="bi bi-printer"> </i>Imprimir</button>
+              <button type="button" class="btn btn-secondary me-2" onclick="history.back();"><i class="bi bi-arrow-left-circle"> </i>Retornar</button>
+              <button type="submit" class="btn btn-primary me-2"><i class="bi bi-arrow-clockwise"> </i>Salvar</button>
+              <button type="button" class="btn btn-success" id="imprimir-btn"><i class="bi bi-printer"> </i>Imprimir</button>
             </div>
 
         </form>
@@ -96,6 +96,7 @@
       </ul>
     </nav>
   </div>
+
 
   <script>
     $(document).ready(function() {
@@ -165,14 +166,12 @@
           }
         });
       });
+
+      // Evento de clique no botão "Imprimir"
+      $('#imprimir-btn').click(function(event) {
+        window.open('/usuario/imprimir_cadastro', '_blank');  // Abre a rota /usuario/imprimir_cadastro em uma nova aba
+      });
     });
   </script>
-
-  <script>
-    function Retornar() {
-        window.location.href = "{{ url_for('menu.home') }}";
-    }
-  </script>
-
 </body>
 </html>
