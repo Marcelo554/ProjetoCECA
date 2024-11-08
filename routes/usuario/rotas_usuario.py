@@ -302,6 +302,17 @@ class PDF(FPDF):
         self.multi_cell(0, 10, body)
 
 
+@usuario_blueprint.route('/filtrar_usuario', methods=['GET'])
+def filtrar_usuario():
+    nome = request.args.get('nome', '').upper()  # Obtém o nome do parâmetro da requisição e converte para maiúsculo
+    usuarios = Usuario.query.filter(Usuario.nome.like(f'%{nome}%')).all()  # Filtra usuários pelo nome
+
+    # Formata os resultados como uma lista de dicionários
+    result = [{'idUsuario': usuario.idUsuario, 'codigo': usuario.codigo, 'nome': usuario.nome, 'senha': usuario.senha} for usuario in usuarios]
+
+    return jsonify({'result': result})
+
+
 @usuario_blueprint.route('/imprimir_cadastro', methods=['GET'])
 def imprimir_cadastro():
     usuarios = Usuario.query.all()

@@ -43,6 +43,10 @@
   </div>
 
   <div class="container-sm mt-5">
+    <div class="d-flex justify-content-end mb-3">
+      <input type="text" class="form-control w-25" id="filtro-nome" placeholder="Filtrar por nome">
+  </div>
+
     <h3 class="text-center mt-5">Pessoas Cadastradas</h3>
     <table class="table table-hover table-responsive">
       <thead class="table-dark">
@@ -107,8 +111,74 @@
         return $('meta[name="csrf-token"]').attr('content');
       }
 
+      // Filtrar usuários pelo nome
+      $('#filtro-nome').on('input', function() {
+        var nome = $(this).val().toUpperCase();
+        $.ajax({
+          url: '/usuario/filtrar_usuario',
+          method: 'GET',
+          data: { nome: nome },
+          headers: { "X-CSRFToken": getCsrfToken() },
+          success: function(data) {
+            console.log("Resposta da busca de usuários:", data);  // Adicione este log para depuração
+            var tbody = $('#usuarios-tbody');
+            tbody.empty();
+            if (data.result.length > 0) {
+              $.each(data.result, function(index, usuario) {
+                var row = $('<tr align="center" class="usuario-row" data-id="' + usuario.idUsuario + '"></tr>');
+                row.append('<td>' + usuario.idUsuario + '</td>');
+                row.append('<td>' + usuario.codigo + '</td>');
+                row.append('<td class="text-start">' + usuario.nome + '</td>');
+                row.append('<td>' + usuario.senha + '</td>');
+                row.append('<td><button class="btn btn-danger btn-sm deletar-btn" data-id="' + usuario.idUsuario + '"><i class="bi bi-trash"></i> Deletar</button></td>');
+                console.log("adicionando.....")
+                tbody.append(row);
+              });
+
+              // Rebind the delete button event to the new buttons added dynamically
+              $('body').on('click', '.deletar-btn', function(event) {
+                event.stopPropagation();  // Impede que o clique no botão "Deletar" acione o clique na linha
+                var idUsuario = $(this).closest('.usuario-row').data('id');
+                console.log("Deletando usuário com idUsuario:", idUsuario);
+                console.log("Enviando dados: ", JSON.stringify({ idUsuario: idUsuario }));
+                $.ajax({
+                  url: '/usuario/deletar',
+                  method: 'POST',
+                  contentType: 'application/json',  // Especifica que estamos enviando JSON
+                  dataType: 'json',  // Especifica que esperamos JSON de volta
+                  headers: { "X-CSRFToken": getCsrfToken() },  // Inclui o token CSRF nos headers
+                  data: JSON.stringify({ idUsuario: idUsuario }),  // Enviar os dados como string JSON
+                  success: function(response) {
+                    console.log("Resposta da exclusão do usuário:", response);
+                    if (response.error) {
+                      alert(response.error);
+                    } else {
+                      alert('Usuário deletado com sucesso.');
+                      location.reload();  // Recarrega a página para atualizar a lista de usuários
+                    }
+                  },
+                  error: function(xhr, status, error) {
+                    console.log("Erro ao deletar usuário:", error);
+                    console.log("Status: ", status);
+                    console.log("Erro: ", xhr.responseText);
+                    alert('Erro ao deletar o usuário.');
+                  }
+                });
+              });
+            } else {
+              // Exibir mensagem de nenhum usuário encontrado
+              tbody.append('<tr><td colspan="5" class="text-center">Nenhum usuário encontrado</td></tr>');
+            }
+          },
+          error: function(xhr, status, error) {
+            console.log("Erro ao filtrar usuários:", error);
+            alert('Erro ao filtrar usuários.');
+          }
+        });
+      });
+
       // Evento de clique na linha da tabela
-      $('.usuario-row').click(function(event) {
+      $('body').on('click', '.usuario-row', function(event) {
         console.log("Linha da tabela clicada.");  // Verifica se o clique na linha foi registrado
         // Impede que o clique no botão "Deletar" acione o clique na linha
         if (!$(event.target).hasClass('btn-danger')) {
@@ -137,7 +207,7 @@
       });
 
       // Evento de clique no botão "Deletar"
-      $('.btn-danger').click(function(event) {
+      $('body').on('click', '.btn-danger', function(event) {
         event.stopPropagation();  // Impede que o clique no botão "Deletar" acione o clique na linha
         var idUsuario = $(this).closest('.usuario-row').data('id');
         console.log("Deletando usuário com idUsuario:", idUsuario);
@@ -173,5 +243,8 @@
       });
     });
   </script>
+
+
+
 </body>
 </html>
