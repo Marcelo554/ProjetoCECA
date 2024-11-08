@@ -15,11 +15,11 @@ class Usuario(db.Model):
     def __repr__(self):
         return f'<Usuario {self.nome}>'
 
-# Funções CRUD usando SQLAlchemy
-def inserir_usuario(session, usuario: Usuario):
-    """Insere um modelo no banco de dados SQLAlchemy"""
-    session.add(usuario)
-    session.commit()
+# # Funções CRUD usando SQLAlchemy
+# def inserir_usuario(session, usuario: Usuario):
+#     """Insere um modelo no banco de dados SQLAlchemy"""
+#     session.add(usuario)
+#     session.commit()
 
 
 def mostrar_todos_usuarios():
@@ -30,25 +30,25 @@ def mostrar_todos_usuarios():
     ]
 
 
-def deletar_usuario(session, idUsuario: int):
-    """Busca um usuário por ID e deleta o registro"""
-    usuario = session.query(Usuario).get(idUsuario)
-    if usuario:
-        session.delete(usuario)
-        session.commit()
-    else:
-        print("Usuário não encontrado")
+# def deletar_usuario(session, idUsuario: int):
+#     """Busca um usuário por ID e deleta o registro"""
+#     usuario = session.query(Usuario).get(idUsuario)
+#     if usuario:
+#         session.delete(usuario)
+#         session.commit()
+#     else:
+#         print("Usuário não encontrado")
 
-def atualizar_usuario(session, idUsuario: int, novo_usuario: Usuario):
-    """Atualiza um usuário existente no banco de dados"""
-    usuario = session.query(Usuario).get(idUsuario)
-    if usuario:
-        usuario.codigo = novo_usuario.codigo
-        usuario.nome = novo_usuario.nome
-        usuario.senha = novo_usuario.senha
-        session.commit()
-    else:
-        print("Usuário não encontrado")
+# def atualizar_usuario(session, idUsuario: int, novo_usuario: Usuario):
+#     """Atualiza um usuário existente no banco de dados"""
+#     usuario = session.query(Usuario).get(idUsuario)
+#     if usuario:
+#         usuario.codigo = novo_usuario.codigo
+#         usuario.nome = novo_usuario.nome
+#         usuario.senha = novo_usuario.senha
+#         session.commit()
+#     else:
+#         print("Usuário não encontrado")
 
 def contar_usuarios(session):
     """Conta todos os usuários no banco de dados"""

@@ -8,7 +8,7 @@ from flask import flash, request, render_template, send_file
 import logging
 from flask import Blueprint,  redirect, url_for, jsonify
 from sqlalchemy.exc import SQLAlchemyError
-
+from datetime import datetime
 from models.models import Usuario, db
 
 from models.models import mostrar_todos_usuarios
@@ -17,27 +17,6 @@ from routes.usuario.forms import Class_Form_Cadastro_Usuario
 
 from fpdf import FPDF
 from io import BytesIO
-
-
-class PDF(FPDF):
-    def header(self):
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, 'Relatório de Usuários', 0, 1, 'C')
-
-    def footer(self):
-        self.set_y(-15)
-        self.set_font('Arial', 'I', 8)
-        self.cell(0, 10, f'Page {self.page_no()}', 0, 0, 'C')
-
-    def chapter_title(self, title):
-        self.set_font('Arial', 'B', 12)
-        self.cell(0, 10, title, 0, 1, 'L')
-        self.ln(10)
-
-    def chapter_body(self, body):
-        self.set_font('Arial', '', 12)
-        self.multi_cell(0, 10, body)
-        self.ln()
 
 
 
@@ -102,7 +81,6 @@ def inserir():
 def lista2():
     """
     Relação usuarios *** ROTA VALIDADA ***
-    Template = usuariolista2.html
     """
 
     # Update variable name to match the template
@@ -130,64 +108,10 @@ def consultar_codigo():
 
 
 
-
-
-
-
-# @usuario_blueprint.route("/atualizar/<int:id>", methods=['GET', 'POST'])
-# def atualizar(id):
-#     """
-#     Atualiza dados do usuário.
-#     """
-#     usuario = Usuario.query.get_or_404(id)
-
-#     if request.method == 'POST':
-#         usuario.codigo = request.form.get("codigo").strip()
-#         usuario.nome = request.form.get("nome").strip().upper()
-
-#         try:
-#             db.session.commit()
-#             flash("Usuário atualizado com sucesso.", "success")
-#             return redirect(url_for('usuario.consultar_codigo'))
-#         except SQLAlchemyError as e:
-#             db.session.rollback()
-#             flash(f"Erro ao atualizar usuário: {str(e)}", "error")
-
-#     return render_template('usuario_manutencao_cadastro.html', usuario=usuario)
-
-
-# @usuario_blueprint.route("/excluir/<int:id>", methods=['POST'])
-# def excluir(id):
-#     """
-#     Exclui usuário do banco de dados.
-#     """
-#     usuario = Usuario.query.get_or_404(id)
-
-#     try:
-#         db.session.delete(usuario)
-#         db.session.commit()
-#         flash("Usuário excluído com sucesso.", "success")
-#         return redirect(url_for('usuario.lista2'))
-#     except SQLAlchemyError as e:
-#         db.session.rollback()
-#         flash(f"Erro ao excluir usuário: {str(e)}", "error")
-#         return redirect(url_for('usuario.lista2'))
-
-
-# def buscar_usuario_por_codigo(codigo):
-#     # Tenta buscar o usuário no banco de dados pelo código fornecido
-#     usuario = Usuario.query.filter_by(codigo=codigo).first()
-#     return usuario
-
-
-
-
-
-
-
 """
-        === ROTINAS AJUSTADAS CADASTRO USUARIO ===
+ ROTINAS AJUSTADAS CADASTRO USUARIO
 """
+
 
 @usuario_blueprint.route("/rota_exibe_grid_usuarios_cadastrados")
 def rota_exibe_grid_usuarios_cadastrados():
@@ -248,6 +172,7 @@ def rota_paginacao_dados_usuarios_cadastrados():
 
 @usuario_blueprint.route("/rota_inclusao_manutencao_cadastro_usuario", methods=["GET", "POST"])
 def rota_inclusao_manutencao_cadastro_usuario():
+    """ INCLUSÃO / ALTERAÇÃO """
     form = Class_Form_Cadastro_Usuario()
 
     if form.validate_on_submit():
@@ -352,6 +277,31 @@ def deletar_usuario():
 
 
 
+class PDF(FPDF):
+    """ Classe FPDF que formata o relatorio"""
+    def header(self):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, 'Relatório de Usuários', 0, 1, 'C')
+        self.set_font('Arial', 'I', 10)
+        self.ln(10)
+
+    def footer(self):
+        self.set_y(-15)
+        self.set_font('Arial', 'I', 8)
+        current_time = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        self.cell(0, 10, f'Emissão: {current_time}', 0, 0, 'L')
+        self.cell(0, 10, f'Página {self.page_no()}', 0, 0, 'R')
+
+    def chapter_title(self, title):
+        self.set_font('Arial', 'B', 12)
+        self.cell(0, 10, title, 0, 1, 'C')
+        self.ln(10)
+
+    def chapter_body(self, body):
+        self.set_font('Arial', '', 10)
+        self.multi_cell(0, 10, body)
+
+
 @usuario_blueprint.route('/imprimir_cadastro', methods=['GET'])
 def imprimir_cadastro():
     usuarios = Usuario.query.all()
@@ -362,12 +312,29 @@ def imprimir_cadastro():
     # Adicionar título
     pdf.chapter_title('Lista de Usuários')
 
-    # Adicionar dados dos usuários
-    for usuario in usuarios:
-        body = f"ID: {usuario.idUsuario}\nCódigo: {usuario.codigo}\nNome: {usuario.nome}\n"
-        pdf.chapter_body(body)
+    # Definir cabeçalhos da tabela
+    pdf.set_font('Arial', 'B', 10)
+    pdf.cell(10, 10, 'ID', 1)
+    pdf.cell(20, 10, 'Código', 1)
+    pdf.cell(160, 10, 'Nome', 1)
+    pdf.ln()
 
-   # Gera o PDF e obtém o conteúdo como string
+    # Adicionar dados dos usuários
+    pdf.set_font('Arial', '', 10)
+    total_usuarios = 0
+    for usuario in usuarios:
+        pdf.cell(10, 10, str(usuario.idUsuario), 1)
+        pdf.cell(20, 10, usuario.codigo, 1)
+        # Usar multi_cell para quebrar o texto do nome em várias linhas se necessário
+        pdf.multi_cell(160, 10, usuario.nome, 1)
+        total_usuarios += 1
+
+    # Adicionar total de registros
+    pdf.ln(10)
+    pdf.set_font('Arial', 'B', 12)
+    pdf.cell(0, 10, f'Total de Registros: {total_usuarios}', 0, 1, 'R')
+
+    # Gera o PDF e obtém o conteúdo como string
     pdf_content = pdf.output(dest='S').encode('latin1')
 
     # Cria um objeto BytesIO e escreve o conteúdo do PDF nele
@@ -375,4 +342,8 @@ def imprimir_cadastro():
     buffer.write(pdf_content)
     buffer.seek(0)
 
-    return send_file(buffer, as_attachment=True, download_name='relatorio_usuarios.pdf', mimetype='application/pdf')
+    # # FAZER DOWNLOAD DO ARQUIVO GERADO
+    # return send_file(buffer, as_attachment=True, download_name='relatorio_usuarios.pdf', mimetype='application/pdf')
+
+    #ABRIR O ARQUIVO GERADO
+    return send_file(buffer, mimetype='application/pdf', download_name='relatorio_usuarios.pdf')

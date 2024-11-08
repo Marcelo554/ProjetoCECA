@@ -18,7 +18,7 @@
             {{ form.hidden_tag() }}
             <div class="mb-3">
               <label for="codigo" class="form-label">Código</label>
-              <input type="text" class="form-control" id="codigo" name="codigo" value='{{ form.codigo.data }}' pattern="\d{5}" maxlength="5" minlength="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+              <input type="text" class="form-control" id="codigo" name="codigo" value='{{ form.codigo.data }}' pattern="\d{1,5}" maxlength="5" minlength="1" required oninput="this.value = this.value.replace(/[^0-9]/g, '');">
             </div>
 
             <div class="mb-3">
