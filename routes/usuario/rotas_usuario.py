@@ -185,13 +185,13 @@ def rota_inclusao_manutencao_cadastro_usuario():
         usuario_existente = Usuario.query.filter_by(codigo=codigo).first()
         if usuario_existente:
             # Atualizando o usuário existente
-            usuario_existente.nome = nome
+            usuario_existente.nome = nome.upper()
             usuario_existente.senha = senha
             db.session.commit()
             flash('Usuário atualizado com sucesso!', 'success')
         else:
             # Criando novo usuário
-            novo_usuario = Usuario(codigo=codigo, nome=nome, senha=senha)
+            novo_usuario = Usuario(codigo=codigo, nome=nome.upper(), senha=senha)
             db.session.add(novo_usuario)
             db.session.commit()
             flash('Usuário cadastrado com sucesso!', 'success')
@@ -315,7 +315,7 @@ def filtrar_usuario():
 
 @usuario_blueprint.route('/imprimir_cadastro', methods=['GET'])
 def imprimir_cadastro():
-    usuarios = Usuario.query.all()
+    usuarios = Usuario.query.order_by(Usuario.nome).all()
 
     pdf = PDF()
     pdf.add_page()
