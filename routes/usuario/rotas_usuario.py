@@ -25,6 +25,7 @@ from io import BytesIO
 usuario_blueprint = Blueprint('usuario', __name__, template_folder='templates')
 
 
+
 @usuario_blueprint.route('/inserir', methods=['GET', 'POST'])
 def inserir():
     """
@@ -38,6 +39,7 @@ def inserir():
         # Pega os dados do formulário
         codigo = request.form.get('codigo', '').strip()
         nome = request.form.get('nome', '').strip().upper()
+        telefone = request.form.get('telefone','')
 
         # Verifique se os dados foram recebidos corretamente
         print(f"Código recebido: {codigo}, Nome recebido: {nome}")
@@ -89,6 +91,13 @@ def lista2():
     # Passe 'usuarios' para o template
     return render_template('usuariolista2.html', usuarios=usuarios)
 
+
+
+@usuario_blueprint.route('/buscar_usuario_por_codigo', methods=['GET', 'POST'])
+def buscar_usuario_por_codigo(codigo):
+    # Tenta buscar o usuário no banco de dados pelo código fornecido
+    usuario = Usuario.query.filter_by(codigo=codigo).first()
+    return usuario
 
 
 @usuario_blueprint.route("/consultar_codigo", methods=['GET', 'POST'])
@@ -177,21 +186,25 @@ def rota_inclusao_manutencao_cadastro_usuario():
 
     if form.validate_on_submit():
         # Obtendo dados do formulário
-        codigo = form.codigo.data
+        idusuario = form.idusuario.data
         nome = form.nome.data
+        telefone = form.telefone.data
         senha = form.senha.data
 
         # Verificando se o usuário já existe
-        usuario_existente = Usuario.query.filter_by(codigo=codigo).first()
+        usuario_existente = Usuario.query.filter_by(idusuario=idusuario).first()
+
         if usuario_existente:
             # Atualizando o usuário existente
+            usuario_existente.idusuario = idusuario
             usuario_existente.nome = nome.upper()
+            usuario_existente.telefone = telefone
             usuario_existente.senha = senha
             db.session.commit()
             flash('Usuário atualizado com sucesso!', 'success')
         else:
             # Criando novo usuário
-            novo_usuario = Usuario(codigo=codigo, nome=nome.upper(), senha=senha)
+            novo_usuario = Usuario(idusuario=idusuario, nome=nome.upper(), telefone=telefone, senha=senha)
             db.session.add(novo_usuario)
             db.session.commit()
             flash('Usuário cadastrado com sucesso!', 'success')
@@ -224,23 +237,24 @@ def rota_inclusao_manutencao_cadastro_usuario():
 
 @usuario_blueprint.route('/buscar_usuario', methods=['GET'])
 def buscar_usuario():
-    """Busca idUsuario no banco"""
+    """Busca idusuario no banco"""
     print('Oiaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa !!!!!!!!!')
     print('Entrei na rotina buscar_usuario ......')
-    id_usuario = request.args.get('idUsuario')
-    print(f"Recebido idUsuario: {id_usuario}")
+    id_usuario = request.args.get('idusuario')
+    print(f"Recebido idusuario: {id_usuario}")
 
     try:
         id_usuario = int(id_usuario)
     except ValueError:
-        return jsonify({"error": "idUsuario inválido"}), 400
+        return jsonify({"error": "idusuario inválido"}), 400
 
-    usuario = Usuario.query.filter_by(idUsuario=id_usuario).first()
+    usuario = Usuario.query.filter_by(idusuario=id_usuario).first()
     if usuario:
         print(f"Usuário encontrado: {usuario.nome}")
         return jsonify({
-            'codigo': usuario.codigo,
+            'idusuario': usuario.idusuario,
             'nome': usuario.nome,
+            'telefone': usuario.telefone,
             'senha': usuario.senha
         })
     else:
@@ -252,20 +266,20 @@ def buscar_usuario():
 def deletar_usuario():
     """Deleta um usuário do banco"""
     data = request.get_json()
-    if not data or 'idUsuario' not in data:
+    if not data or 'idusuario' not in data:
         print("Dados inválidos recebidos.")
         return jsonify({"error": "Dados inválidos"}), 400
 
-    id_usuario = data['idUsuario']
-    print(f"Tentando deletar idUsuario: {id_usuario}")
+    id_usuario = data['idusuario']
+    print(f"Tentando deletar idusuario: {id_usuario}")
 
     try:
         id_usuario = int(id_usuario)
     except ValueError:
-        print("idUsuario inválido.")
-        return jsonify({"error": "idUsuario inválido"}), 400
+        print("idusuario inválido.")
+        return jsonify({"error": "idusuario inválido"}), 400
 
-    usuario = Usuario.query.filter_by(idUsuario=id_usuario).first()
+    usuario = Usuario.query.filter_by(idusuario=id_usuario).first()
     if usuario:
         db.session.delete(usuario)
         db.session.commit()
@@ -308,7 +322,7 @@ def filtrar_usuario():
     usuarios = Usuario.query.filter(Usuario.nome.like(f'%{nome}%')).all()  # Filtra usuários pelo nome
 
     # Formata os resultados como uma lista de dicionários
-    result = [{'idUsuario': usuario.idUsuario, 'codigo': usuario.codigo, 'nome': usuario.nome, 'senha': usuario.senha} for usuario in usuarios]
+    result = [{'idusuario': usuario.idusuario, 'codigo': usuario.codigo, 'nome': usuario.nome, 'senha': usuario.senha} for usuario in usuarios]
 
     return jsonify({'result': result})
 
@@ -320,30 +334,29 @@ def imprimir_cadastro():
     pdf = PDF()
     pdf.add_page()
 
-    # Adicionar título
-    pdf.chapter_title('Lista de Usuários')
-
     # Definir cabeçalhos da tabela
     pdf.set_font('Arial', 'B', 10)
-    pdf.cell(10, 10, 'ID', 1)
-    pdf.cell(20, 10, 'Código', 1)
-    pdf.cell(160, 10, 'Nome', 1)
+    pdf.cell(10, 8, 'ID', 1)
+    pdf.cell(80, 8, 'Nome', 1)
+    pdf.cell(60, 8, 'Telefone', 1)
     pdf.ln()
 
     # Adicionar dados dos usuários
-    pdf.set_font('Arial', '', 10)
+    pdf.set_font('Arial', '', 8)
     total_usuarios = 0
     for usuario in usuarios:
-        pdf.cell(10, 10, str(usuario.idUsuario), 1)
-        pdf.cell(20, 10, usuario.codigo, 1)
-        # Usar multi_cell para quebrar o texto do nome em várias linhas se necessário
-        pdf.multi_cell(160, 10, usuario.nome, 1)
+        pdf.cell(10, 10, str(usuario.idusuario), 1)
+        # Usar uma célula fixa para o nome para manter tudo na mesma linha
+        pdf.cell(80, 10, usuario.nome, 1)
+        telefone = usuario.telefone if usuario.telefone else "Não disponível"
+        pdf.cell(60, 10, telefone, 1)
+        pdf.ln()  # Quebra a linha após imprimir os dados de cada usuário
         total_usuarios += 1
 
     # Adicionar total de registros
     pdf.ln(10)
     pdf.set_font('Arial', 'B', 12)
-    pdf.cell(0, 10, f'Total de Registros: {total_usuarios}', 0, 1, 'R')
+    pdf.cell(0, 10, f'Total de Registros: {total_usuarios}', 0, 1, 'L')
 
     # Gera o PDF e obtém o conteúdo como string
     pdf_content = pdf.output(dest='S').encode('latin1')
@@ -353,8 +366,5 @@ def imprimir_cadastro():
     buffer.write(pdf_content)
     buffer.seek(0)
 
-    # # FAZER DOWNLOAD DO ARQUIVO GERADO
-    # return send_file(buffer, as_attachment=True, download_name='relatorio_usuarios.pdf', mimetype='application/pdf')
-
-    #ABRIR O ARQUIVO GERADO
+    # ABRIR O ARQUIVO GERADO
     return send_file(buffer, mimetype='application/pdf', download_name='relatorio_usuarios.pdf')

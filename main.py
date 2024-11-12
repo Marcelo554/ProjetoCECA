@@ -1,11 +1,10 @@
 """
 Modulo principal do sistema biblioteca
 """
-
 import logging  # Import padrão
 
 # Import de terceiros
-from flask import Flask, redirect, url_for, Blueprint
+from flask import Flask,  redirect, url_for, Blueprint
 from flask_wtf.csrf import CSRFProtect
 
 from models.config import Config
@@ -20,22 +19,23 @@ from routes.menu.rotas_menu import menu_blueprint
 app = Flask(__name__)
 
 # Registrando a blueprint (usuario)
-app.register_blueprint(usuario_blueprint, url_prefix="/usuario")
-app.register_blueprint(diversas_blueprint, url_prefix="/diversas")
-app.register_blueprint(menu_blueprint, url_prefix="/menu")
+app.register_blueprint(usuario_blueprint, url_prefix='/usuario')
+app.register_blueprint(diversas_blueprint, url_prefix='/diversas')
+app.register_blueprint(menu_blueprint, url_prefix='/menu')
 
 
 app.config.from_object(Config)  # Carrega as configurações do Config
-print("Banco de Dados URI:", app.config.get("SQLALCHEMY_DATABASE_URI"))
+print("Banco de Dados URI:", app.config.get('SQLALCHEMY_DATABASE_URI'))\
+
 
 # Verifique a configuração do banco de dados
-print(app.config["SQLALCHEMY_DATABASE_URI"])  # Debugging
+print(app.config['SQLALCHEMY_DATABASE_URI'])  # Debugging
 
 # Configurando o logging
 logging.basicConfig(level=logging.INFO)
 
 # Defina a secret_key (use uma chave segura e aleatória)
-app.secret_key = "sua_chave_secreta_aqui"  # Troque por algo mais seguro
+app.secret_key = 'sua_chave_secreta_aqui'  # Troque por algo mais seguro
 
 
 # Inicialize CSRF e o banco de dados
@@ -44,22 +44,22 @@ db.init_app(app)  # Inicializa o banco de dados com a configuração do Flask
 
 
 # Chama o menu principal ao iniciar
-@app.route("/")
+@app.route('/')
 def index():
-    """index"""
-    return redirect(url_for("menu.home"))
+    """ index """
+    return redirect(url_for('menu.home'))
 
 
 # Definindo o filtro personalizado#
-@app.template_filter("mask")
+@app.template_filter('mask')
 def mask_filter(s):
     if s is None:
-        return ""  # Retorna uma string vazia se o valor for None
-    return "*" * len(s)
+        return '' # Retorna uma string vazia se o valor for None
+    return '*' * len(s)
 
 
 # Certifique-se de registrar o filtro
-app.jinja_env.filters["mask"] = mask_filter
+app.jinja_env.filters['mask'] = mask_filter
 
 # Cria as tabelas no Banco de Dados se não existirem
 if __name__ == "__main__":

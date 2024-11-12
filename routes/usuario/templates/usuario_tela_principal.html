@@ -16,18 +16,27 @@
       <div class="col-12 col-md-6 col-lg-4 mx-auto">
         <form id="form-usuario" action="{{ url_for('usuario.rota_inclusao_manutencao_cadastro_usuario') }}" method="POST">
             {{ form.hidden_tag() }}
+
             <div class="mb-3">
-              <label for="codigo" class="form-label">Código</label>
-              <input type="text" class="form-control" id="codigo" name="codigo" value="{{ form.codigo.data }}" pattern="\d{1,5}" maxlength="5" required>
+              <label for="idusuario" class="form-label">ID</label>
+              <input type="text" class="form-control" id="idusuario" name="idusuario" value="{{ form.idusuario.data }}" maxlength="100">
             </div>
+
             <div class="mb-3">
               <label for="nome" class="form-label">Nome</label>
               <input type="text" class="form-control" id="nome" name="nome" value="{{ form.nome.data }}" maxlength="100">
             </div>
+
+            <div class="mb-3">
+              <label for="telefone" class="form-label">Telefone</label>
+              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(99) 99999-9999" maxlength="14">
+            </div>
+
             <div class="mb-3">
               <label for="senha" class="form-label">Senha</label>
               <input type="password" class="form-control" id="senha" name="senha" value="{{ form.senha.data }}" maxlength="10">
             </div>
+
             <div class="d-flex justify-content-between">
               <button type="button" class="btn btn-secondary me-2" onclick="history.back();">Retornar</button>
               <button type="reset" class="btn btn-warning me-2">Limpar</button> <!-- Botão de limpar -->
@@ -50,22 +59,22 @@
     <table class="table table-hover table-responsive">
       <thead class="table-dark">
         <tr align="center">
-          <th>idUsuario</th>
-          <th>Código</th>
+          <th>idusuario</th>
           <th>Nome</th>
+          <th>Telefone</th>
           <th>Senha</th>
           <th>Ações</th>
         </tr>
       </thead>
       <tbody id="usuarios-tabela">
         {% for usuario in result %}
-        <tr align="center" class="usuario-row" data-id="{{ usuario.idUsuario }}">
-          <td>{{ usuario.idUsuario }}</td>
-          <td>{{ usuario.codigo }}</td>
+        <tr align="center" class="usuario-row" data-id="{{ usuario.idusuario }}">
+          <td>{{ usuario.idusuario }}</td>
           <td class="text-start">{{ usuario.nome }}</td>
+          <td class="text-start">{{ usuario.telefone }}</td>
           <td>{{ usuario.senha|mask }}</td>
           <td>
-            <button class="btn btn-danger btn-sm deletar-btn" data-id="{{ usuario.idUsuario }}">
+            <button class="btn btn-danger btn-sm deletar-btn" data-id="{{ usuario.idusuario }}">
               <i class="bi bi-trash"></i> Deletar
             </button>
           </td>
@@ -80,17 +89,18 @@
       // Evento de clique na linha da tabela para carregar os dados nos campos
       $('.usuario-row').click(function(event) {
         if (!$(event.target).hasClass('deletar-btn')) {
-          var idUsuario = $(this).data('id');
+          var idusuario = $(this).data('id');
           $.ajax({
             url: '/usuario/buscar_usuario',
             method: 'GET',
-            data: { idUsuario: idUsuario },
+            data: { idusuario: idusuario },
             success: function(data) {
               if (data.error) {
                 alert(data.error);
               } else {
-                $('#codigo').val(data.codigo);
+                $('#idusuario').val(Number(data.idusuario));
                 $('#nome').val(data.nome);
+                $('#telefone').val(data.telefone);
                 $('#senha').val(data.senha);
               }
             },
@@ -112,12 +122,12 @@
       // Evento de clique no botão "Deletar"
       $('.deletar-btn').click(function(event) {
         event.stopPropagation();
-        var idUsuario = $(this).data('id');
+        var idusuario = $(this).data('id');
         $.ajax({
           url: '/usuario/deletar',
           method: 'POST',
           contentType: 'application/json',
-          data: JSON.stringify({ idUsuario: idUsuario }),
+          data: JSON.stringify({ idusuario: idusuario }),
           headers: { "X-CSRFToken": $('meta[name="csrf-token"]').attr('content') },
           success: function(response) {
             if (response.error) {
