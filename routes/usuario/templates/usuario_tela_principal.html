@@ -22,14 +22,15 @@
               <input type="text" class="form-control" id="idusuario" name="idusuario" value="{{ form.idusuario.data }}" maxlength="100">
             </div>
 
+
             <div class="mb-3">
               <label for="nome" class="form-label">Nome</label>
-              <input type="text" class="form-control" id="nome" name="nome" value="{{ form.nome.data }}" maxlength="100">
+              <input type="text" class="form-control" id="nome" name="nome" value="{{ form.nome.data }}" maxlength="100" oninput="this.value = this.value.toUpperCase()">
             </div>
 
             <div class="mb-3">
-              <label for="telefone" class="form-label">Telefone</label>
-              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(99) 99999-9999" maxlength="14">
+              <label for="telefone" class="form-label">Celular</label>
+              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(99) 99999-9999" maxlength="14" oninput="formatarTelefone(this)">
             </div>
 
             <div class="mb-3">
@@ -83,6 +84,19 @@
       </tbody>
     </table>
   </div>
+
+  <script>
+    function formatarTelefone(input) {
+      // Remove todos os caracteres não numéricos
+      let numbersOnly = input.value.replace(/\D/g, '');
+
+      // Formata o número com a máscara
+      let formattedNumber = numbersOnly.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+
+      // Atualiza o valor do input
+      input.value = formattedNumber;
+    }
+    </script>
 
   <script>
     $(document).ready(function() {

@@ -24,8 +24,6 @@ from io import BytesIO
 # Define o Blueprint para o módulo de usuário
 usuario_blueprint = Blueprint('usuario', __name__, template_folder='templates')
 
-
-
 @usuario_blueprint.route('/inserir', methods=['GET', 'POST'])
 def inserir():
     """
@@ -182,19 +180,43 @@ def rota_paginacao_dados_usuarios_cadastrados():
 @usuario_blueprint.route("/rota_inclusao_manutencao_cadastro_usuario", methods=["GET", "POST"])
 def rota_inclusao_manutencao_cadastro_usuario():
     """ INCLUSÃO / ALTERAÇÃO """
+    print('Entrei aqui 1 ... ')
     form = Class_Form_Cadastro_Usuario()
 
+    # VALIDANDO O FORMULÁRIO PARA GRAVAÇÃO DOS DADOS
+    form.validate()
     if form.validate_on_submit():
+        # Se a validação passar, o código aqui será executado
+        print("Formulário válido!")
+        # Aqui você faria o que quiser com os dados do formulário, como salvar no banco de dados
+    else:
+        print("Formulário inválido!")
+        # Imprimir os erros para o usuário
+        for field, errors in form.errors.items():
+            for error in errors:
+                print(f"Erro em {field}: {error}")
+                flash(f"Erro em {field}: {error}")
+
+
+    # GRAVANDO OS DADOS NA TABELA (INSERT/UPDATE)
+    if form.validate_on_submit():
+        print('Entrei aqui 2 ... ')
         # Obtendo dados do formulário
         idusuario = form.idusuario.data
         nome = form.nome.data
         telefone = form.telefone.data
         senha = form.senha.data
 
+        print('idusuario = ')
+        print(idusuario)
+
         # Verificando se o usuário já existe
         usuario_existente = Usuario.query.filter_by(idusuario=idusuario).first()
 
+        print(usuario_existente)
+
         if usuario_existente:
+            print('Entrei aqui 4 ... ')
             # Atualizando o usuário existente
             usuario_existente.idusuario = idusuario
             usuario_existente.nome = nome.upper()
@@ -203,12 +225,14 @@ def rota_inclusao_manutencao_cadastro_usuario():
             db.session.commit()
             flash('Usuário atualizado com sucesso!', 'success')
         else:
+            print('Entrei aqui 5 ... ')
             # Criando novo usuário
             novo_usuario = Usuario(idusuario=idusuario, nome=nome.upper(), telefone=telefone, senha=senha)
             db.session.add(novo_usuario)
             db.session.commit()
             flash('Usuário cadastrado com sucesso!', 'success')
 
+        print('Entrei aqui 3 ... ')
         return redirect(url_for('usuario.rota_inclusao_manutencao_cadastro_usuario'))
 
     # Obtendo todos os usuários ordenados pelo nome
