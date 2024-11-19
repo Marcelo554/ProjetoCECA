@@ -14,23 +14,23 @@
     <div class="row">
       <h1 class="text-center my-4">Cadastrar Usuários</h1>
       <div class="col-12 col-md-6 col-lg-4 mx-auto">
+
         <form id="form-usuario" action="{{ url_for('usuario.rota_inclusao_manutencao_cadastro_usuario') }}" method="POST">
             {{ form.hidden_tag() }}
 
             <div class="mb-3">
-              <label for="idusuario" class="form-label">ID</label>
-              <input type="text" class="form-control" id="idusuario" name="idusuario" value="{{ form.idusuario.data }}" maxlength="100">
+              <label for="idusuario" class="form-label"></label> <input type="hidden" class="form-control" id="idusuario" name="idusuario" value="{{ form.idusuario.data }}" maxlength="100">
             </div>
 
 
             <div class="mb-3">
               <label for="nome" class="form-label">Nome</label>
-              <input type="text" class="form-control" id="nome" name="nome" value="{{ form.nome.data }}" maxlength="100" oninput="this.value = this.value.toUpperCase()">
+              <input type="text" class="form-control" id="nome" name="nome" value="{{ form.nome.data }}" maxlength="100" oninput="this.value = this.value.toUpperCase()" required>
             </div>
 
             <div class="mb-3">
               <label for="telefone" class="form-label">Celular</label>
-              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(99) 99999-9999" maxlength="14" oninput="formatarTelefone(this)">
+              <input type="text" class="form-control" id="telefone" name="telefone" placeholder="(99) 99999-9999" maxlength="15" oninput="formatarTelefone(this)">
             </div>
 
             <div class="mb-3">
@@ -39,7 +39,7 @@
             </div>
 
             <div class="d-flex justify-content-between">
-              <button type="button" class="btn btn-secondary me-2" onclick="history.back();">Retornar</button>
+              <button type="button" class="btn btn-secondary me-2" onclick="Retornar_Menu()">Retornar</button>
               <button type="reset" class="btn btn-warning me-2">Limpar</button> <!-- Botão de limpar -->
               <button type="submit" class="btn btn-primary me-2">Salvar</button>
               <button type="button" class="btn btn-success" id="imprimir-btn">Imprimir</button>
@@ -85,6 +85,10 @@
     </table>
   </div>
 
+
+  <!-- ---------------- SCRIPTS ------------ -->
+
+
   <script>
     function formatarTelefone(input) {
       // Remove todos os caracteres não numéricos
@@ -97,6 +101,7 @@
       input.value = formattedNumber;
     }
     </script>
+
 
   <script>
     $(document).ready(function() {
@@ -163,5 +168,15 @@
       });
     });
   </script>
+
+<script>
+  function Retornar_Menu() {
+    window.location.href = "{{ url_for('menu.menu_opcoes_cadastro_usuario') }}";
+}
+</script>
+  }
+</script>
+
+
 </body>
 </html>

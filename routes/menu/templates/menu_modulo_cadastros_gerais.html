@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Menu</title>
     <link
-    rel="stylesheet"
-    href="{{ url_for('static', filename='css/styles.css') }}"
-  <link>
-
-
-</head>
-<body>
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/styles.css') }}"
+      <link
+    />
+  </head>
+  <body>
     <h1>Modulo: Cadastros gerais</h1>
     <ul>
-        <li><a href="{{ url_for('menu.menu_opcoes_cadastro_usuario') }}">1- Cadastro usuário</a></li>
-
-
+      <li>
+        <a href="{{ url_for('menu.menu_opcoes_cadastro_usuario') }}"
+          >1- Cadastro usuário</a
+        >
+      </li>
     </ul>
 
     <br />
 
     <div class="button-container">
-        <br />
-        <!--    <button class="btn salvar">Salvar</button>-->
-        <button class="btn voltar" onclick="Retornar()">Retornar</button>
-        <!--    <button class="btn atualizar">Atualizar</button>-->
+      <br />
+      <!--    <button class="btn salvar">Salvar</button>-->
+      <button class="btn voltar" onclick="Retornar()">Retornar</button>
+      <!--    <button class="btn atualizar">Atualizar</button>-->
     </div>
 
     <script>
-        function Retornar() {
-            window.location.href = "{{ url_for('menu.home') }}";
-        }
+      function Retornar() {
+        window.location.href = "{{ url_for('menu.home') }}";
+      }
     </script>
-
-</body>
+  </body>
 </html>
