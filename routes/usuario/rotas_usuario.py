@@ -6,7 +6,10 @@
 from flask import flash, request, render_template, send_file
 import logging
 from flask import Blueprint, redirect, url_for, jsonify
+<<<<<<< HEAD
 from wtforms import StringField, IntegerField, PasswordField, SubmitField
+=======
+>>>>>>> origin/main
 from sqlalchemy.exc import SQLAlchemyError
 from datetime import datetime
 from models.models import Usuario, db
@@ -173,6 +176,7 @@ def rota_paginacao_dados_usuarios_cadastrados():
 
 
 
+<<<<<<< HEAD
 
 @usuario_blueprint.route(
     "/rota_inclusao_manutencao_cadastro_usuario", methods=["GET", "POST"])  #SEM O IDUSUARIO
@@ -181,8 +185,14 @@ def rota_paginacao_dados_usuarios_cadastrados():
 def rota_inclusao_manutencao_cadastro_usuario(idusuario=None):
     """ INCLUSÃO / ALTERAÇÃO """
     print('inicio da rota.................')
+=======
+@usuario_blueprint.route("/rota_inclusao_manutencao_cadastro_usuario", methods=["GET", "POST"])
+def rota_inclusao_manutencao_cadastro_usuario():
+>>>>>>> origin/main
     form = Class_Form_Cadastro_Usuario()
+    acao = request.form.get("acao")  # Captura o valor da ação
 
+<<<<<<< HEAD
 
     # Converte `idusuario` para string, se existir
     idusuario_str = str(idusuario) if idusuario is not None else None
@@ -277,6 +287,43 @@ def rota_inclusao_manutencao_cadastro_usuario(idusuario=None):
                 print(f"Erro em {field}: {error}")
                 flash(f"Erro em {field}: {error}")
 
+=======
+    print('Ação=', acao)
+
+    if request.method == "POST" and form.validate_on_submit():
+        idusuario = form.idusuario.data
+        nome = form.nome.data
+        telefone = form.telefone.data
+        senha = form.senha.data
+
+        try:
+            if acao == "alterar" and idusuario:  # Para alteração de registro
+                usuario_existente = Usuario.query.get(idusuario)
+                if usuario_existente:
+                    usuario_existente.nome = nome.upper()
+                    usuario_existente.telefone = telefone
+                    usuario_existente.senha = senha
+                    db.session.commit()
+                    flash("Usuário atualizado com sucesso!", "success")
+                else:
+                    flash("Usuário não encontrado.", "warning")
+            elif acao == "novo":  # Para inclusão de novo registro
+                novo_usuario = Usuario(nome=nome.upper(), telefone=telefone, senha=senha)
+                db.session.add(novo_usuario)
+                db.session.commit()
+                flash("Usuário cadastrado com sucesso!", "success")
+            else:
+                flash("Ação inválida ou ID de usuário não fornecido para alteração.", "error")
+        except Exception as e:
+            db.session.rollback()
+            flash("Ocorreu um erro ao salvar o usuário.", "error")
+            print(f"Erro ao salvar usuário: {e}")
+
+        return redirect(url_for('usuario.rota_inclusao_manutencao_cadastro_usuario'))
+
+    # Código restante para GET e renderização de template
+
+>>>>>>> origin/main
 
     # Obtendo todos os usuários ordenados pelo nome
     usuarios = Usuario.query.order_by(Usuario.nome).all()
